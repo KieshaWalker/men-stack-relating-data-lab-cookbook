@@ -1,9 +1,11 @@
 <nav>
   <a href="/">Home</a>
   <% if(user) { %>
-      <a href="/items">View All Food Items</a> 
-  <a href="/auth/sign-out">Sign Out</a>
+    <a href="/items/add">Add an Item</a>
+    <a href="/items">View All Food Items</a> 
+    <a href="/auth/sign-out">Sign Out</a>
   <% } else { %>
+    <h1>Welcome to the Pantry, guest.</h1>
   <a href="/auth/sign-in">Sign In</a>
   <a href="/auth/sign-up">Sign Up</a>
   <% } %>

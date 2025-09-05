@@ -34,6 +34,8 @@ app.use(passUserToView);
 app.use('/auth', authController);
 app.use(isSignedIn);
 app.use('/items', allItemsController);
+//app.use('/users/:userId/items', allItemsController);
+
 
 app.get('/', (req, res) => {
   res.render('index.ejs', {
