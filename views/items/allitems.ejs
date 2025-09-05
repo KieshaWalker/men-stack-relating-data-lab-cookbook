@@ -7,9 +7,20 @@
 </head>
 <body>
       <%- include('../partials/_navbar.ejs') %>
-      
     <h1>All Food Items</h1>
-    <p>testing</p>
+
+    <a href="/items/edit">
+    <% tuna.forEach(food => { %>
+        <p> name: <%= food.name %> </p>
+        <p>quantity: <%= food.quantity %> </p>
+        <p>description: <%= food.description %> </p> <br>
+   
+   <% }); %>
+      </a>
+
+
+
+
 
 </body>
 </html>
