@@ -9,8 +9,8 @@
       <%- include('../partials/_navbar.ejs') %>
     <h1>All Food Items</h1>
 
-    <a href="/items/edit">
-    <% tuna.forEach(food => { %>
+    <a href="/items/edit/:itemId">
+    <% item.forEach(food => { %>
         <p> name: <%= food.name %> </p>
         <p>quantity: <%= food.quantity %> </p>
         <p>description: <%= food.description %> </p> <br>

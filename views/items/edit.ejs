@@ -7,9 +7,9 @@
 </head>
 <body>
     <%- include('../partials/_navbar.ejs') %>
-    <h1>Food Item description</h1>
+    <h1>Update Item description</h1>
 
-    <form action="/items" <%=food._id %>?_method="put" method="POST">
+    <form action="/items/"<%= user._id %><%= item._id%>?_method="put" method="POST">
             <label for="name">Name of Item</label>
             <input 
             type="text"
@@ -24,7 +24,7 @@
             name="description"
             id="description"
             value="<%= user.description %>">
-            <button type="submit">add item</button>
+            <button type="submit">edit item</button>
 </form>
 
 </body>
