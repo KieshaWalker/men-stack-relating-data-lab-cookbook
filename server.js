@@ -32,8 +32,7 @@ app.use(
 
 app.use(passUserToView);
 app.use('/auth', authController);
-app.use(isSignedIn);
-app.use('/items', allItemsController);
+app.use('/items', isSignedIn, allItemsController);
 //app.use('/users/:userId/items', allItemsController);
 
 
@@ -42,6 +41,10 @@ app.get('/', (req, res) => {
     user: req.session.user,
   });
 });
+
+
+
+
 
 app.listen(port, () => {
   console.log(`The express app is ready on port ${port}!`);

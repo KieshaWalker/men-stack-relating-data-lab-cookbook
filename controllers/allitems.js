@@ -4,77 +4,81 @@ const router = express.Router();
 const User = require('../models/user.js');
 
 
-router.get('/', async (req, res) => {// items/items// landing view is just // any time you use the word use the /items everything follows that slash.
-    try{
-        const currentUser = await User.findById(req.session.user._id);
-        res.render('items/allitems.ejs' , { item: currentUser.foods });
-    } catch (error) {
-        console.log(error)
-        res.redirect('/')
-    }
+// List all foods
+router.get('/', async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.session.user._id);
+    res.render('items/allitems.ejs', { item: currentUser.foods });
+  } catch (error) {
+    console.log(error);
+    return res.redirect('/');
+  }
 });
 
-router.get('/add', async (req, res) => {
-    console.log('in route')
-    res.render('items/add.ejs')
+// New form
+router.get('/add', (req, res) => {
+  res.render('items/add.ejs');
 });
 
-
-router.get('/edit/:itemId', async (req, res) => {
-     try{
-        const currentUser = await User.findById(req.session.user._id);
-            const item = currentUser.foods.id(req.params.itemId);
-                res.locals.food = item;
-        res.render('items/edit.ejs' , { item: currentUser });
-    } catch (error) {
-        console.log(error)
-        res.redirect('/')
-    }
-});
 
 router.put('/edit/:itemId', async (req, res) => {
-    console.log(req.body)
     try {
-const currentUser = await User.findById(req.session.user._id);
-    const item = currentUser.foods.id(req.params.itemId);
-
-        if (!item) {
-            return res.status(404).send('Item not found');
-        }
-
-            item.set(req.body);
-        await currentUser.save();
-        res.redirect("/items");
-        
-    } catch (error) {
-        console.log(error)
-        res.redirect('/')
-    }
-});
-
-
-
-
-router.post('/', async (req, res) => {
-    console.log(req.body)
-     try{
+        console.log('put route hit');
         const currentUser = await User.findById(req.session.user._id);
-        currentUser.foods.push(req.body)
+        const food = currentUser.foods.id(req.params.itemId);
+        food.name = req.body.name;
+        food.quantity = req.body.quantity;
+        food.description = req.body.description;
         await currentUser.save();
+        res.redirect('/items');
     } catch (error) {
-        console.log(error)
-        res.redirect('/')
+        console.log(error);
+        return res.redirect('/');
     }
-    res.redirect("/items")
 });
 
+// Edit form (single item)
+router.get('/edit/:itemId', async (req, res) => {
+    try {
+        const currentUser = await User.findById(req.session.user._id);
+        const food = currentUser.foods.id(req.params.itemId);
+        res.render('items/edit.ejs', { item: food });
+    } catch (error) {
+        console.log(error);
+        return res.redirect('/');
+    }
+});
 
-router.delete('/', async (req, res) => {})
+// Create
+router.post('/', async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.session.user._id);
+    currentUser.foods.push({
+      name: req.body.name,
+      quantity: req.body.quantity,
+      description: req.body.description,
+    });
+    await currentUser.save();
+    res.redirect('/items');
+  } catch (error) {
+    console.log(error);
+    return res.redirect('/');
+  }
+});
 
-
-
-
-
-
+router.delete('/:itemId', async (req, res) => {
+    try {
+        const currentUser = await User.findById(req.session.user._id);
+        const item = currentUser.foods.id(req.params.itemId);
+        if (item) {
+            item.deleteOne(); // removes the subdocument
+            await currentUser.save();
+        }
+        res.redirect('/items');
+    } catch (e) {
+        console.log(e);
+        res.redirect('/items');
+    }
+});
 
 module.exports = router;

@@ -9,18 +9,18 @@
       <%- include('../partials/_navbar.ejs') %>
     <h1>All Food Items</h1>
 
-    <a href="/items/edit/:itemId">
-    <% item.forEach(food => { %>
-        <p> name: <%= food.name %> </p>
-        <p>quantity: <%= food.quantity %> </p>
-        <p>description: <%= food.description %> </p> <br>
-   
-   <% }); %>
-      </a>
-
-
-
-
+<% item.forEach(food => { %>
+  <div >
+    <a href="/items/edit/<%= food._id %>">
+        <p>Name: <%= food.name %></p>
+        <p>Quantity: <%= food.quantity %></p>
+        <p>Description: <%= food.description %></p>
+    </a>
+    <form action="/items/<%= food._id %>?_method=DELETE" method="POST" style="display:inline;">
+      <button type="submit">Delete</button>
+    </form>
+  </div>
+<% }); %>
 
 </body>
 </html>
