@@ -1,51 +1,68 @@
-const dotenv = require('dotenv');
-dotenv.config();
-const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
-const methodOverride = require('method-override');
-const morgan = require('morgan');
-const session = require('express-session');
-const isSignedIn = require('./middleware/is-signed-in.js');
-const passUserToView = require('./middleware/pass-user-to-view.js');
+// Load environment variables from .env file early
+const dotenv = require('dotenv'); // import dotenv to handle environment config
+dotenv.config(); // load variables into process.env
+// Core dependencies
+const express = require('express'); // express framework
+const app = express(); // instantiate express app
+const mongoose = require('mongoose'); // MongoDB ODM
+const methodOverride = require('method-override'); // allows PUT/DELETE via forms
+const morgan = require('morgan'); // request logger (currently optional)
+const session = require('express-session'); // session middleware
 
-const authController = require('./controllers/auth.js');
-const allItemsController = require('./controllers/allitems.js');
-const port = process.env.PORT ? process.env.PORT : '3000';
+// Custom middleware
+const isSignedIn = require('./middleware/is-signed-in.js'); // auth gate
+const passUserToView = require('./middleware/pass-user-to-view.js'); // inject user into res.locals
 
-mongoose.connect(process.env.MONGODB_URI);
+// Controllers (routers)
+const authController = require('./controllers/auth.js'); // /auth routes
+const allItemsController = require('./controllers/allitems.js'); // /items routes
+const usersController = require('./controllers/users.js'); // /users community routes
+// Config constants with defaults
+const PORT = process.env.PORT || '3000'; // server port
+const { MONGODB_URI, SESSION_SECRET } = process.env; // destructure needed env vars
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI); // initiate connection
 
-mongoose.connection.on('connected', () => {
-  console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
+// Connection success log
+mongoose.connection.on('connected', () => { // listen for connection event
+  console.log(`Connected to MongoDB ${mongoose.connection.name}.`); // log db name
 });
+// Body parser for form submissions
+app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 
-app.use(express.urlencoded({ extended: false }));
-app.use(methodOverride('_method'));
+// Method override to support PUT/DELETE from forms using ?_method=VERB or hidden input
+app.use(methodOverride('_method')); // mount method-override middleware
+
+// Optional request logging (uncomment for debugging)
 // app.use(morgan('dev'));
+
+// Session setup (stores session ID in cookie, data server-side/in memory by default)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
+    secret: SESSION_SECRET, // secret for signing session ID cookie
+    resave: false,          // don't save unchanged sessions
+    saveUninitialized: true // create session for new visitors
   })
 );
 
-app.use(passUserToView);
-app.use('/auth', authController);
-app.use('/items', isSignedIn, allItemsController);
-//app.use('/users/:userId/items', allItemsController);
+// Inject user (if any) into all rendered views
+app.use(passUserToView); // attach res.locals.user
 
+// Public auth routes (sign-in/up/out)
+app.use('/auth', authController); // mount /auth router
 
-app.get('/', (req, res) => {
-  res.render('index.ejs', {
-    user: req.session.user,
+// Protected community + items routes
+app.use('/users', isSignedIn, usersController); // community pages
+app.use('/items', isSignedIn, allItemsController); // pantry item CRUD
+
+// Home page (conditionally shows different content if signed in)
+app.get('/', (req, res) => { // root route handler
+  res.render('index.ejs', { // render home template
+    user: req.session.user // pass session user explicitly (also in res.locals)
   });
 });
 
-
-
-
-
-app.listen(port, () => {
-  console.log(`The express app is ready on port ${port}!`);
+// Start the HTTP server
+app.listen(PORT, () => { // begin listening on configured port
+  console.log(`The express app is ready on port ${PORT}!`); // log startup message
 });
